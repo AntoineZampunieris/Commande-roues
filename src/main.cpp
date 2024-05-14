@@ -42,14 +42,14 @@ DRV8835MotorShield motors;
 //QTRSensorsRC qtrrc((unsigned char[]) {3, 4, 5, 6, 7, 8, 9, 10}, 8);
 const uint8_t SensorCount = 8;
 uint16_t sensorValues[SensorCount];
+int speed;
 
 
 
 void demarrage(){
   for (int speed = 0; speed <= 400; speed++)
   {
-    motors.setM1Speed(speed);
-    motors.setM2Speed(speed);
+    motors.setSpeeds(speed,speed);
     delay(20);
   }
   
@@ -105,53 +105,49 @@ void setup()
 
 
 
-void tournantdroite3(void){
-  int speed=400;
+void tournantdroite3(int speed){
+  int speedm1=speed;
   do{
-  for (int speed = 400; speed >=0 ; speed--)
+  for (int speed; speed >=0 ; speed--)
   {
-    motors.setM1Speed((400+speed)/4);
+    motors.setM1Speed((speedm1+speed)/2);
     motors.setM2Speed(speed);
     delay(2);
     
   }
   }while(speed>0);
-  if(speed==0){
-      motors.setM1Speed((400+speed)/4);
-      motors.setM2Speed(speed);
-    }
+  motors.setM1Speed((speedm1+speed)/2);
+  motors.setM2Speed(speed);
+  
 }
-void tournantdroite2(void){
-  int speed=400;
+void tournantdroite2(int speed){
+  int speedm1=speed;
   do{
-  for (int speed = 400; speed >=0 ; speed--)
+  for (int speed; speed >=100 ; speed--)
   {
-    motors.setM1Speed((400+speed)/3);
+    motors.setM1Speed((speedm1+speed)/2);
     motors.setM2Speed(speed);
-    delay(2);
+    delay(3);
     
   }
-  }while(speed>0);
-  if(speed==0){
-      motors.setM1Speed((400+speed)/3);
-      motors.setM2Speed(speed);
-    }
+  }while(speed>100);
+  motors.setM1Speed((speedm1+speed)/2);
+  motors.setM2Speed(speed);
+    
 }
-void tournantdroite1(void){
-  int speed=400;
+void tournantdroite1(int speed){
+  int speedm1=speed;
   do{
-  for (int speed = 400; speed >=0 ; speed--)
+  for (int speed; speed >=200 ; speed--)
   {
-    motors.setM1Speed((400+speed)/2);
+    motors.setM1Speed((speedm1+speed)/2);
     motors.setM2Speed(speed);
-    delay(2);
+    delay(4);
     
   }
-  }while(speed>0);
-  if(speed==0){
-      motors.setM1Speed((400+speed)/2);
+  }while(speed>200);
+      motors.setM1Speed((speedm1+speed)/2);
       motors.setM2Speed(speed);
-    }
 }
 
 void tournantgauche3(void){
