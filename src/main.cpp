@@ -30,10 +30,10 @@
 // of 3/4" black electrical tape to a piece of white paper and sliding the
 // sensor across it. It prints the sensor values to the serial monitor as
 // numbers from 0 (maximum reflectance) to 1000 (minimum reflectance) followed
-// by the estimated location of the line as a number from 0 to 5000. 1000 means
+// by the estimated location of the line as a number from 0 to 10000. 1000 means
 // the line is directly under sensor 1, 2000 means directly under sensor 2,
 // etc. 0 means the line is directly under sensor 0 or was last seen by sensor
-// 0 before being lost. 5000 means the line is directly under sensor 5 or was
+// 0 before being lost. 10000 means the line is directly under sensor 5 or was
 // last seen by sensor 5 before being lost.
 
 QTRSensors qtr;
@@ -47,10 +47,14 @@ int speed;
 
 
 void demarrage(){
+  //motors.flipM1(true);
   for (int speed = 0; speed <= 400; speed++)
   {
+    
     motors.setSpeeds(speed,speed);
-    delay(20);
+    
+    motors.setM1Speed(speed);
+    delay(10);
   }
   
 
@@ -66,7 +70,7 @@ void setup()
   qtr.setSensorPins((const uint8_t[]){A4, A3, A2, A1, A0, 4, 5, 6}, SensorCount);
   qtr.setEmitterPin(A5);
 
-  delay(500);
+  delay(1000);
   digitalWrite(2,HIGH);
  
   pinMode(LED_BUILTIN, OUTPUT);
@@ -150,59 +154,59 @@ void tournantdroite1(int speed){
       motors.setM2Speed(speed);
 }
 
-void tournantgauche3(void){
-  int speed=400;
+void tournantgauche3(int speed){
+  int speedm2=speed;
   do{
-  for (int speed = 400; speed >=0 ; speed--)
+  for (int speed; speed >=0 ; speed--)
   {
-    motors.setM2Speed((400+speed)/4);
+    motors.setM2Speed((speedm2+speed)/2);
     motors.setM1Speed(speed);
     delay(2);
     
   }
   }while(speed>0);
-  if(speed==0){
-      motors.setM2Speed((400+speed)/4);
+      motors.setM2Speed((speedm2+speed)/2);
       motors.setM1Speed(speed);
-    }
 }
 
-void tournantgauche2(void){
-  int speed=400;
+void tournantgauche2(int speed){
+  int speedm2=speed;
   do{
-  for (int speed = 400; speed >=0 ; speed--)
+  for (int speed; speed >=100 ; speed--)
   {
-    motors.setM2Speed((400+speed)/3);
+    motors.setM2Speed((speedm2+speed)/2);
     motors.setM1Speed(speed);
     delay(2);
     
   }
-  }while(speed>0);
-  if(speed==0){
-      motors.setM2Speed((400+speed)/3);
+  }while(speed>100);
+      motors.setM2Speed((speedm2+speed)/2);
       motors.setM1Speed(speed);
-    }
 }
-
-void tournantgauche1(void){
-  int speed=400;
+void tournantgauche1(int speed){
+  int speedm2=speed;
   do{
-  for (int speed = 400; speed >=0 ; speed--)
+  for (int speed; speed >=200 ; speed--)
   {
-    motors.setM2Speed((400+speed)/2);
+    motors.setM2Speed((speedm2+speed)/2);
     motors.setM1Speed(speed);
     delay(2);
     
   }
-  }while(speed>0);
-  if(speed==0){
-      motors.setM2Speed((400+speed)/2);
+  }while(speed>200);
+      motors.setM2Speed((speedm2+speed)/2);
       motors.setM1Speed(speed);
-    }
 }
 
 void toutdroit(){
-  motors.setSpeeds(400,400);
+  motors.flipM1(true);
+  for (int speed; speed==400 ; speed++)
+  {
+    motors.setSpeeds(speed,speed);
+    delay(2);
+    
+  }
+  
 }
 
 void stop(){
@@ -217,10 +221,53 @@ int getPosition(){
   return qtr.readLineBlack(sensorValues);
 }
 
+int getSpeed(){
+  return speed;
+}
+
+void makeDecision(){
+  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[7]==1000&&getPosition()>10000&&getPosition()<3000){
+    tournantdroite3(speed);
+  }
+  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[6]==1000&&getPosition()>10000&&getPosition()<3000){
+    tournantdroite2(speed);
+  }
+  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]==1000&&getPosition()>10000&&getPosition()<3000){
+    tournantdroite1(speed);
+  }
+  if(sensorValues[7]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[2]==1000&&getPosition()>4000){
+    tournantgauche1(speed);
+  }
+  if(sensorValues[7]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[1]==1000&&getPosition()>4000){
+    tournantgauche2(speed);
+  }
+  if(sensorValues[7]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[0]==1000&&getPosition()<3000){
+    tournantgauche3(speed);
+  }
+  if((sensorValues[3]==1000||sensorValues[4]==1000)&&sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&getPosition()<5000&&getPosition()>3000){
+    toutdroit();
+  }
+  if(sensorValues[0]==1000&&sensorValues[4]==1000&&sensorValues[7]==1000){
+    stop();
+  }
+  /*if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000){
+    toutdroit();
+  }
+  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&getPosition()>10000){
+    tournantdroite3(speed);
+  }
+  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&getPosition()<3000){
+    tournantgauche3(speed);
+  }*/
+  else{
+    toutdroit();
+  }
+}
+
 void loop()
 {
   // read calibrated sensor values and obtain a measure of the line position
-  // from 0 to 5000 (for a white line, use readLineWhite() instead)
+  // from 0 to 10000 (for a white line, use readLineWhite() instead)
   uint16_t position = qtr.readLineBlack(sensorValues);
 
   // print the sensor values as numbers from 0 to 1000, where 0 means maximum
@@ -233,46 +280,14 @@ void loop()
   }
   Serial.println(position);
 
-  
-  if(sensorValues[7]>900){
-    tournantdroite3();
-  }
-  if(sensorValues[6]>900){
-    tournantdroite2();
-  }
-  if(sensorValues[5]>900){
-    tournantdroite1();
-  }
-  if(sensorValues[2]>900){
-    tournantgauche1();
-  }
-  if(sensorValues[1]>900){
-    tournantgauche2();
-  }
-  if(sensorValues[0]>900){
-    tournantgauche3();
-  }
-  if(sensorValues[3]>900||sensorValues[4]>900){
-    toutdroit();
-  }
-  if(sensorValues[0]>900&&sensorValues[4]>900&&sensorValues[7]>900){
-    stop();
-  }
-  if(sensorValues[0]<500&&sensorValues[1]<500&&sensorValues[2]<500&&sensorValues[3]<500&&sensorValues[4]<500&&sensorValues[5]<500&&sensorValues[6]<500&&sensorValues[7]<500){
-    toutdroit();
-  }
-  if(sensorValues[0]<500&&sensorValues[1]<500&&sensorValues[2]<500&&sensorValues[3]<500&&sensorValues[4]<500&&sensorValues[5]<500&&sensorValues[6]<500&&sensorValues[7]<500&&getPosition()>5000){
-    tournantdroite3();
-  }
-  if(sensorValues[0]<500&&sensorValues[1]<500&&sensorValues[2]<500&&sensorValues[3]<500&&sensorValues[4]<500&&sensorValues[5]<500&&sensorValues[6]<500&&sensorValues[7]<500&&getPosition()<3000){
-    tournantgauche3();
-  }
-  delay(750);
+  makeDecision();
   
 
+  delay(250);
+  
   getPosition();
 
- 
+  getSpeed();
 }
 
 DRV8835MotorShield::DRV8835MotorShield() :
