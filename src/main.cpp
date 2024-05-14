@@ -51,11 +51,17 @@ void demarrage(){
   for (int speed = 0; speed <= 400; speed++)
   {
     
-    motors.setSpeeds(speed,speed);
+    motors.setM2Speed(speed);
     
-    motors.setM1Speed(speed);
+    //motors.setM1Speed(speed);
     delay(10);
   }
+    for (int speed = 0; speed >= -400; speed--)
+  {
+    motors.setM1Speed(speed);
+    delay(2);
+  }
+  
   
 
 }
@@ -70,7 +76,7 @@ void setup()
   qtr.setSensorPins((const uint8_t[]){A4, A3, A2, A1, A0, 4, 5, 6}, SensorCount);
   qtr.setEmitterPin(A5);
 
-  delay(1000);
+  //delay(1000);
   digitalWrite(2,HIGH);
  
   pinMode(LED_BUILTIN, OUTPUT);
@@ -79,7 +85,7 @@ void setup()
   // 2.5 ms RC read timeout (default) * 10 reads per calibrate() call
   // = ~25 ms per calibrate() call.
   // Call calibrate() 400 times to make calibration take about 10 seconds.
-  for (uint16_t i = 0; i < 400; i++)
+  for (uint16_t i = 0; i < 4; i++)
   {
     qtr.calibrate();
   }
@@ -199,12 +205,22 @@ void tournantgauche1(int speed){
 }
 
 void toutdroit(){
-  motors.flipM1(true);
-  for (int speed; speed==400 ; speed++)
+  //motors.flipM1(false);
+  /*for (int speed; speed==400 ; speed++)
   {
-    motors.setSpeeds(speed,speed);
+    motors.setSpeeds(-speed,speed);
     delay(2);
     
+  }*/
+  for (int speed = 0; speed <= 400; speed--)
+  {
+    motors.setM2Speed(speed);
+    delay(2);
+  }
+  for (int speed = 0; speed >= -400; speed--)
+  {
+    motors.setM1Speed(speed);
+    delay(2);
   }
   
 }
@@ -226,7 +242,7 @@ int getSpeed(){
 }
 
 void makeDecision(){
-  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[7]==1000&&getPosition()>10000&&getPosition()<3000){
+  /*if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[7]==1000&&getPosition()>10000&&getPosition()<3000){
     tournantdroite3(speed);
   }
   if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[6]==1000&&getPosition()>10000&&getPosition()<3000){
@@ -249,7 +265,7 @@ void makeDecision(){
   }
   if(sensorValues[0]==1000&&sensorValues[4]==1000&&sensorValues[7]==1000){
     stop();
-  }
+  }*/
   /*if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000){
     toutdroit();
   }
@@ -258,10 +274,10 @@ void makeDecision(){
   }
   if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&getPosition()<3000){
     tournantgauche3(speed);
-  }*/
+  }
   else{
     toutdroit();
-  }
+  }*/
 }
 
 void loop()
@@ -281,6 +297,8 @@ void loop()
   Serial.println(position);
 
   makeDecision();
+
+  toutdroit();
   
 
   delay(250);
