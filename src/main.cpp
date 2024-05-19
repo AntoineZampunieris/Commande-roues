@@ -45,24 +45,20 @@ uint16_t sensorValues[SensorCount];
 int speed;
 int speedm1;
 int speedm2;
+int speedmax = 200;
+int delaystart = 20;
+int delaydef = 10;
 int position_ante;
-int speed_ante;
 
 void demarrage()
 {
-  // motors.flipM1(true);
-  //  motors.flipM2(false);
-  /*while(1){
-    //speed=1;
-    motors.setM1Speed(10);
-    motors.setM2Speed(10);*/
-
-  for (int speed; speed <= 400; speed++)
+  Serial.println("start");
+  for (int speed; speed <= speedmax; speed++)
   {
-
+    Serial.println("start_for");
     motors.setM1Speed(speed);
     motors.setM2Speed(speed);
-    delay(5);
+    delay(delaystart);
   }
 }
 
@@ -84,7 +80,7 @@ void setup()
   // 2.5 ms RC read timeout (default) * 10 reads per calibrate() call
   // = ~25 ms per calibrate() call.
   // Call calibrate() 400 times to make calibration take about 10 seconds.
-  for (uint16_t i = 0; i < 4; i++)
+  for (uint16_t i = 0; i < 400; i++)
   {
     qtr.calibrate();
   }
@@ -108,148 +104,256 @@ void setup()
   Serial.println();
   Serial.println();
   delay(1000);
-  // demarrage();
-  // motors.flipM1(true);
-  // motors.flipM2(true);
+  demarrage();
 }
 
 void tournantdroite3(int speed)
 {
   int speedm1 = speed;
+  Serial.println("tournerdroite3");
   for (int speed; speed >= 0; speed--)
   {
-    motors.setM2Speed((speedm1 + speed) / 2);
-    motors.setM1Speed(speed);
-    delay(2);
+    Serial.println("tournerdroite3_for");
+    motors.setM1Speed((speedm1 + speed) / 2);
+    motors.setM2Speed(speed);
+    delay(delaydef);
   }
 }
 
 void tournantdroite2(int speed)
 {
   int speedm1 = speed;
-  for (int speed; speed >= 100; speed--)
+  Serial.println("tournerdroite2");
+  for (int speed; speed >= 50; speed--)
   {
-    motors.setM2Speed((speedm1 + speed) / 2);
-    motors.setM1Speed(speed);
-    delay(3);
+    Serial.println("tournerdroite2_for");
+    motors.setM1Speed((speedm1 + speed) / 2);
+    motors.setM2Speed(speed);
+    delay(delaydef);
   }
 }
 
 void tournantdroite1(int speed)
 {
   int speedm1 = speed;
-  for (int speed; speed >= 200; speed--)
+  Serial.println("tournerdroite1");
+  for (int speed; speed >= 100; speed--)
   {
+    Serial.println("tournerdroite1_for");
     motors.setM1Speed((speedm1 + speed) / 2);
     motors.setM2Speed(speed);
-    delay(4);
+    delay(delaydef);
   }
 }
 
 void tournantgauche3(int speed)
 {
   int speedm2 = speed;
+  Serial.println("tournergauche3");
   for (int speed; speed >= 0; speed--)
   {
+    Serial.println("tournergauche3_for");
     motors.setM2Speed((speedm2 + speed) / 2);
     motors.setM1Speed(speed);
-    delay(2);
+    delay(delaydef);
   }
 }
 
 void tournantgauche2(int speed)
 {
   int speedm2 = speed;
-  for (int speed; speed >= 100; speed--)
+  Serial.println("tournergauche2");
+  for (int speed; speed >= 50; speed--)
   {
+    Serial.println("tournergauche2_for");
     motors.setM2Speed((speedm2 + speed) / 2);
     motors.setM1Speed(speed);
-    delay(2);
+    delay(delaydef);
   }
 }
 
 void tournantgauche1(int speed)
 {
   int speedm2 = speed;
-  for (int speed; speed >= 200; speed--)
+  Serial.println("tournergauche1");
+  for (int speed; speed >= 100; speed--)
   {
+    Serial.println("tournergauche1_for");
     motors.setM2Speed((speedm2 + speed) / 2);
     motors.setM1Speed(speed);
-    delay(2);
+    delay(delaydef);
   }
 }
 
 void toutdroit()
 {
-
-  for (int speed; speed == 400; speed++)
+  Serial.println("tout_droit");
+  for (int speed; speed == speedmax; speed++)
   {
+    Serial.println("tout_droit_for");
     motors.setM2Speed(speed);
     motors.setM1Speed(speed);
-    delay(2);
+    delay(delaydef);
+  }
+}
+
+void turnRight()
+{
+  Serial.println("turnRight");
+  for (int speed; speed == 0; speed--)
+  {
+    motors.setM1Speed(speed);
+    delay(delaydef);
+  }
+  for (int speed; speed <= speedmax; speed++)
+  {
+    motors.setM1Speed(speed);
+    delay(delaydef);
+  }
+}
+
+void turnLeft()
+{
+  Serial.println("turnLeft");
+  for (int speed; speed == 0; speed--)
+  {
+    motors.setM2Speed(speed);
+    delay(delaydef);
+  }
+  for (int speed; speed <= speedmax; speed++)
+  {
+    motors.setM2Speed(speed);
+    delay(delaydef);
   }
 }
 
 void stop()
 {
+  Serial.println("stop");
   for (int speed; speed >= 0; speed--)
   {
+    Serial.println("stop_for");
     motors.setSpeeds(speed, speed);
-    delay(20);
+    delay(delaydef);
   }
 }
 
 int getPosition()
 {
+  Serial.println("getPosition");
   return qtr.readLineBlack(sensorValues);
 }
 
 int getSpeed()
 {
+  Serial.println("getSpeed");
   return speed;
 }
 
 void makeDecision()
 {
-  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[7]==1000&&position_ante<7000&&speed_ante>0){
+  int result;
+  /*for(int i=4; i<=7; i++)
+  {
+    if(sensorValues[i]==1000)
+    {
+      result = i;
+      i=7;
+    }
+  }
+  for(int i=3; i>=0; i--)
+  {
+    if(sensorValues[i]==1000)
+    {
+      result = i;
+      i=0;
+    }
+  }*/
+
+  /*if(position_ante>0 && position_ante<7000)
+  {
+    switch(result)
+    {
+      case 7:
+        tournantdroite3(speed);
+        break;
+      case 6:
+        tournantdroite2(speed);
+        break;
+      case 5:
+        tournantdroite1(speed);
+        break;
+      case 2:
+        tournantgauche1(speed);
+        break;
+      case 1:
+        tournantgauche2(speed);
+        break;
+      case 0:
+        tournantgauche3(speed);
+        break;
+    }
+  }
+  else if (position_ante==7000){
     tournantdroite3(speed);
   }
-  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[6]==1000&&sensorValues[7]<1000&&position_ante<7000&&speed_ante>0){
+  else if (position_ante==0){
+    tournantgauche3(speed);
+  }*/
+  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[7] == 1000 && position_ante > 0 && position_ante < 7000)
+  {
+    tournantdroite3(speed);
+  }
+  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[6] == 1000 && position_ante > 0 && position_ante < 7000)
+  {
     tournantdroite2(speed);
   }
-  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[5]==1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&position_ante<7000&&speed_ante>0){
+  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[5] == 1000 && position_ante > 0 && position_ante < 7000)
+  {
     tournantdroite1(speed);
   }
-  if (speed_ante==0){
-    demarrage();
-  }
-  /*if(sensorValues[7]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[2]==1000&&position_ante>4000){
+  if (sensorValues[7] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[2] == 1000 && position_ante > 4000)
+  {
     tournantgauche1(speed);
   }
-  if(sensorValues[7]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[1]==1000&&position_ante>4000){
+  if (sensorValues[7] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[1] == 1000 && position_ante > 4000)
+  {
     tournantgauche2(speed);
   }
-  if(sensorValues[7]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[0]==1000&&position_ante<3000){
+  if (sensorValues[7] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[0] == 1000 && position_ante < 3000)
+  {
     tournantgauche3(speed);
   }
-  if((sensorValues[3]==1000||sensorValues[4]==1000)&&sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&position_ante<5000&&position_ante>3000){
+  /*if((sensorValues[3]==1000||sensorValues[4]==1000)&&sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&position_ante<5000&&position_ante>3000){
     toutdroit();
-  }
-  if(sensorValues[0]==1000&&sensorValues[4]==1000&&sensorValues[7]==1000){
-    stop();
   }*/
+  if (sensorValues[0] == 1000 && sensorValues[4] == 1000 && sensorValues[7] == 1000)
+  {
+    stop();
+  }
   /*if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000){
     toutdroit();
-  }
-  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&position_ante>10000){
+  }*/
+  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[7] < 1000 && position_ante == 7000)
+  {
     tournantdroite3(speed);
   }
-  if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&position_ante<3000){
+  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[7] < 1000 && position_ante == 0)
+  {
     tournantgauche3(speed);
   }
-  else{
-    toutdroit();
-  }*/
+}
+
+void makeDecision2()
+{
+  if (sensorValues[0] == 1000 || sensorValues[1] == 1000 || sensorValues[2] == 1000)
+  {
+    turnRight();
+  }
+  if (sensorValues[5] == 1000 || sensorValues[6] == 1000 || sensorValues[7] == 1000)
+  {
+    turnLeft();
+  }
 }
 
 void loop()
@@ -268,15 +372,15 @@ void loop()
   }
   Serial.println(position);
 
-  //makeDecision();
+  // makeDecision();
 
   // toutdroit();
 
   // stop();
 
-  //demarrage();
+  // demarrage();
 
-  for (int speed; speed < 400; speed++)
+  /*for (int speed; speed <= 400; speed++)
   {
     motors.setM2Speed(speed);
     motors.setM1Speed(speed);
@@ -284,33 +388,18 @@ void loop()
     /*for (int speedm1; speedm1>=-speed;speedm1--)
     {
       motors.setM1Speed(speedm1);
-    }*/
+    }
 
-    delay(2);
-  }
-  delay(500);
-
-    /*int speedm1 = speed;
-  for (int speed; speed >= 0; speed--)
-  {
-    motors.setM2Speed((speedm1 + speed) / 2);
-    motors.setM1Speed(speed);
     delay(2);
   }*/
 
-  for (int speedm1; speedm1 > 0; speedm1--)
-  {
-       // motors.setM2Speed(speed);
-    motors.setM1Speed(speedm1);
-    delay(2);
-  }
-  delay(500);
+  makeDecision2();
 
   delay(250);
 
-  int position_ante = getPosition();
+  //int position_ante = getPosition();
 
-  int speed_ante = getSpeed();
+  //int speed_ante = getSpeed();
 }
 
 DRV8835MotorShield::DRV8835MotorShield() : _M1DIR(7), _M1PWM(9), _M2DIR(8), _M2PWM(10)
