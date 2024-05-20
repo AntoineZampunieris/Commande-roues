@@ -24,8 +24,19 @@ int speedmax = 50;
 int delaystart = 5;
 int delaydef = 2;
 int position_ante;
-int G;
+//int G;
+//int D;
+int P;
+int I;
 int D;
+int error;
+int PIDvalue;
+int previousError;
+int Kd=1;
+int Ki=0;
+int Kp=0.02;
+int PWM_SETPOINT=20;
+
 
 void demarrage()
 {
@@ -358,7 +369,7 @@ void makeDecision()
   else if (position_ante==0){
     tournantgauche3(  );
   }*/
-  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[7] == 1000 && position_ante < 7000)
+  /*if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[7] == 1000 && position_ante < 7000)
   {
     tournantdroite3();
   }
@@ -386,14 +397,14 @@ void makeDecision()
   /*if((sensorValues[3]==1000||sensorValues[4]==1000)&&sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000&&position_ante<5000&&position_ante>3000){
     toutdroit();
   }*/
-  if (sensorValues[0] == 1000 && sensorValues[4] == 1000 && sensorValues[7] == 1000)
+  /*if (sensorValues[0] == 1000 && sensorValues[4] == 1000 && sensorValues[7] == 1000)
   {
     stop();
   }
   /*if(sensorValues[0]<1000&&sensorValues[1]<1000&&sensorValues[2]<1000&&sensorValues[3]<1000&&sensorValues[4]<1000&&sensorValues[5]<1000&&sensorValues[6]<1000&&sensorValues[7]<1000){
     toutdroit();
   }*/
-  if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[7] < 1000 && position_ante == 7000)
+  /*if (sensorValues[0] < 1000 && sensorValues[1] < 1000 && sensorValues[2] < 1000 && sensorValues[3] < 1000 && sensorValues[4] < 1000 && sensorValues[5] < 1000 && sensorValues[6] < 1000 && sensorValues[7] < 1000 && position_ante == 7000)
   {
     tournantdroite3();
   }
@@ -401,7 +412,7 @@ void makeDecision()
   {
     Serial.println("horsdeposition");
     tournantgauche3();
-  }
+  }*/
 }
 
 /*void makeDecision2()
@@ -426,6 +437,28 @@ void makeDecision()
   }
 }*/
 
+void Line_Follow(uint16_t position)
+{
+  error = position - 3500;
+ 
+  P = error;
+  I = I + error;
+  D = error - previousError;
+ 
+  PIDvalue = (Kp * P) + (Ki * I) + (Kd * D);
+  previousError = error;
+ 
+  speedm1 = PWM_SETPOINT - PIDvalue;
+  speedm2 = PWM_SETPOINT + PIDvalue;
+ 
+ 
+  //if (Left_speed >255){Left_speed = 200;}
+  //if (Right_speed >255){Right_speed = 200;}
+  if (speedm2 <0){speedm2 = 0;}
+  if (speedm1 <0){speedm1 = 0;}
+ 
+}
+
 void loop()
 {
   // read calibrated sensor values and obtain a measure of the line position
@@ -442,7 +475,7 @@ void loop()
   }
   Serial.println(position);
 
-  makeDecision();
+  //makeDecision();
 
   // toutdroit();
 
@@ -465,9 +498,14 @@ void loop()
 
   // makeDecision2();
 
-  delay(250);
+  Line_Follow(position);
 
-  int position_ante = getPosition();
+  analogWrite(9,speedm1);
+  analogWrite(10,speedm2);
+
+  //delay(250);
+
+  //int position_ante = getPosition();
 
   // int speed_ante = getSpeed();
 }
